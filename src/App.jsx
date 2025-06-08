@@ -39,7 +39,7 @@ const [fcmToken, setFcmToken] = useState(null);
 
   useEffect(() => {
   onMessage(messaging, (payload) => {
-    console.log("Message received in foreground: ", payload);
+    // console.log("Message received in foreground: ", payload);
     alert(payload?.notification?.title + ": " + payload?.notification?.body);
   });
 }, []);
