@@ -29,11 +29,11 @@ const [fcmToken, setFcmToken] = useState(null);
    useEffect(() => {
     if (fcmToken && user) {
       // send token to backend
-      // fetch("http://localhost:5000/api/user/save-token", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ userId: user._id, fcmtoken: fcmToken }),
-      // });
+      fetch("http://localhost:5000/api/user/save-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id, fcmtoken: fcmToken }),
+      });
     }
   }, [fcmToken, user]);
 
