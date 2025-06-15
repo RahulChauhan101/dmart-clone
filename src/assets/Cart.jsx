@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useSelector } from "react-redux";
 import { MdOutlineDeleteForever, MdCancelPresentation } from "react-icons/md";
 import { LiaMoneyBillWaveSolid } from "react-icons/lia";
+import { addToCart } from "../components/actions/addtoCart";
 
 const Cart = () => {
   const [data, setData] = useState([]);
@@ -50,20 +52,7 @@ const Cart = () => {
 
   const handleAddToCart = (selectedPrice, productId) => {
     console.log("asd", userId, productId, selectedPrice);
-    axios
-      .post("http://localhost:5000/api/user/add-to-cart", {
-        userId,
-        productId,
-        priceId: selectedPrice,
-        quantity: 1,
-      })
-      .then((res) => {
-        console.log("Cart Response", res.data);
-        updateCartUI();
-      })
-      .catch((err) => {
-        console.error("Error adding to cart", err);
-      });
+   dispatch(addToCart( userId, productId, selectedPrice))
   };
 
   const handleDecrementa = (selectedPrice, productId) => {

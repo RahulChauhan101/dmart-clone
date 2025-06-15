@@ -10,13 +10,22 @@ import "swiper/css";
 import "swiper/css/navigation";
 import ProductSelect from "./Productselect";
 import Cart from "../assets/Cart";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  addToCart
+} from "../components/actions/addtoCart";
+
+
 
 const Deals = () => {
+   const Deal = useSelector((state) => state?.Deals?.Deals);
+console.log("");
+
   const [data, setData] = useState([]);
   const [selectedPrices, setSelectedPrices] = useState({});
   const [userid, setUserid] = useState("");
   const [wishlistItems, setWishlistItems] = useState([]);
-
+  const dispatch = useDispatch();
   // Fetch products
   useEffect(() => {
     async function fetchData() {
@@ -77,15 +86,12 @@ const Deals = () => {
   };
 
   const handleAddToCart = (selectedPrice, productId) => {
-    axios
-      .post("http://localhost:5000/api/user/add-to-cart", {
-        userId: userid,
-        productId,
-        priceId: selectedPrice._id,
-        quantity: 1,
-      })
-      .then((res) => console.log("Cart Response", res.data))
-      .catch((err) => console.error("Error adding to cart", err));
+    console.log("asd",userid,productId,selectedPrice);
+    
+   dispatch(addToCart( {
+    userId: userid,
+    productId: productId,
+    priceId: selectedPrice._id}))
   };
 
   const handleAddToWish = async (selectedPrice, productId) => {
@@ -198,6 +204,7 @@ const Deals = () => {
                   }
                   disabled={selectedPrice.Stock <= 0}
                 >
+                  
                   <LuShoppingCart size={18} />
                   <span className="ml-2">ADD TO CART</span>
                 </button>
