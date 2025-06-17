@@ -9,23 +9,18 @@ import { FaRegHeart } from "react-icons/fa";
 import "swiper/css";
 import "swiper/css/navigation";
 import ProductSelect from "./Productselect";
-import Cart from "../assets/Cart";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  addToCart
-} from "../components/actions/addtoCart";
-
-
+import { addToCart } from "../components/actions/addtoCart";
+import { addToWish } from "../components/actions/addToWish";
 
 const Deals = () => {
-   const Deal = useSelector((state) => state?.Deals?.Deals);
-console.log("");
-
+  const Deal = useSelector((state) => state?.Deals?.Deals);
   const [data, setData] = useState([]);
   const [selectedPrices, setSelectedPrices] = useState({});
   const [userid, setUserid] = useState("");
   const [wishlistItems, setWishlistItems] = useState([]);
   const dispatch = useDispatch();
+
   // Fetch products
   useEffect(() => {
     async function fetchData() {
@@ -46,8 +41,6 @@ console.log("");
     fetchData();
   }, []);
 
-  
-
   // Fetch user and wishlist
   useEffect(() => {
     const getUser = async () => {
@@ -64,10 +57,11 @@ console.log("");
 
         // Get wishlist
         const wishRes = await axios.get(`http://localhost:5000/api/user/wish/${uid}`);
-        const wishIds = (wishRes.data.wish || []).map((item) =>
-          typeof item.productId === "object" ? item.productId._id : item.productId
-        );
-        setWishlistItems(wishIds);
+        const wishData = (wishRes.data.wish || []).map((item) => ({
+          productId: typeof item.productId === "object" ? item.productId._id : item.productId,
+          priceId: item.priceId,
+        }));
+        setWishlistItems(wishData);
       } catch (err) {
         console.error("Error loading user/wishlist", err);
       }
@@ -86,30 +80,23 @@ console.log("");
   };
 
   const handleAddToCart = (selectedPrice, productId) => {
-    console.log("asd",userid,productId,selectedPrice);
-    
-   dispatch(addToCart( {
-    userId: userid,
-    productId: productId,
-    priceId: selectedPrice._id}))
+    dispatch(
+      addToCart({
+        userId: userid,
+        productId: productId,
+        priceId: selectedPrice._id,
+      })
+    );
   };
 
-  const handleAddToWish = async (selectedPrice, productId) => {
-    try {
-      await axios.post("http://localhost:5000/api/user/add-to-wish", {
+  const handleAddToWish = (selectedPrice, productId) => {
+    dispatch(
+      addToWish({
         userId: userid,
-        productId,
+        productId: productId,
         priceId: selectedPrice._id,
-        quantity: 1,
-      });
-
-      // Update wishlistItems UI
-      setWishlistItems((prev) =>
-        prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
-      );
-    } catch (err) {
-      console.error("Error adding to wish", err);
-    }
+      })
+    );
   };
 
   return (
@@ -133,24 +120,25 @@ console.log("");
         {data.filter(checkUnblock).map((product) => {
           const selectedPrice = selectedPrices[product._id] || product.price?.[0] || {};
 
+          const isWished = wishlistItems.some(
+            (item) => item.productId === product._id && item.priceId === selectedPrice._id
+          );
+
           return (
             <SwiperSlide key={product._id}>
               <div className="bg-white my-2 ml-10 p-2 border border-gray-300 rounded-md w-[270px] h-[520px] shadow-sm">
                 <div>
                   <h1 className="flex justify-between mx-5 mt-3">
                     <button onClick={() => handleAddToWish(selectedPrice, product._id)}>
-                      {wishlistItems.includes(product._id) ? (
+                      {isWished ? (
                         <RiHeartFill className="text-red-700 text-2xl cursor-pointer" />
                       ) : (
                         <FaRegHeart className="text-red-700 text-2xl cursor-pointer" />
                       )}
                     </button>
 
-                    
                     Stock:
                     {selectedPrice.Stock > 0 ? selectedPrice.Stock : "Out of Stock"}
-              
-                    {/* {selectedPrice.Stock < 0 ? selectedPrice.Stock : handleAddToWish(selectedPrice, product._id)} */}
                   </h1>
                 </div>
 
@@ -171,9 +159,7 @@ console.log("");
 
                 <div className="flex justify-between text-sm mt-1 mb-2">
                   <div className="flex">
-                    <p className="line-through text-gray-500">
-                      MRP: {selectedPrice.MRP}
-                    </p>
+                    <p className="line-through text-gray-500">MRP: {selectedPrice.MRP}</p>
                     <p className="text-black-600 font-semibold mx-4">
                       Dmart: {selectedPrice.DmartPrice}
                     </p>
@@ -204,7 +190,6 @@ console.log("");
                   }
                   disabled={selectedPrice.Stock <= 0}
                 >
-                  
                   <LuShoppingCart size={18} />
                   <span className="ml-2">ADD TO CART</span>
                 </button>

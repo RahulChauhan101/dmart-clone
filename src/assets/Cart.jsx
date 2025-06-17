@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { MdOutlineDeleteForever, MdCancelPresentation } from "react-icons/md";
 import { LiaMoneyBillWaveSolid } from "react-icons/lia";
 import { addToCart } from "../components/actions/addtoCart";
+import { deletetoCart } from "../components/actions/deletetoCart";
 
 const Cart = () => {
+  const dispatch = useDispatch();
   const [data, setData] = useState([]);
   const [isInCart, setIsInCart] = useState([]);
   const [userId, setUserId] = useState("");
@@ -33,7 +35,6 @@ const Cart = () => {
         if (isMounted) {
           setData(cartResponse.data);
           setIsInCart(cartResponse.data.cart || []);
-          
         }
       } catch (err) {
         if (err.name !== "CanceledError") {
@@ -52,7 +53,7 @@ const Cart = () => {
 
   const handleAddToCart = (selectedPrice, productId) => {
     console.log("asd", userId, productId, selectedPrice);
-   dispatch(addToCart( userId, productId, selectedPrice))
+    dispatch(addToCart(userId, productId, selectedPrice));
   };
 
   const handleDecrementa = (selectedPrice, productId) => {
@@ -75,18 +76,9 @@ const Cart = () => {
       });
   };
 
-  const handleCancel =  (selectedPrice, productId) => {
-     console.log("delete", userId, productId, selectedPrice);
- axios.delete("http://localhost:5000/api/user/delete-to-cart", {
-        data: { userId, productId, priceId: selectedPrice},
-      })
-      .then((res) => {
-        console.log("cart res.",res.data);
-            updateCartUI();
-      })
-     .catch ((err) => {
-      console.error("Error removing item from cart", err);
-    });
+  const handleCancel = (selectedPrice, productId) => {
+    console.log("delete redex", userId, productId, selectedPrice);
+    dispatch(deletetoCart(userId, productId, selectedPrice));
   };
 
   const updateCartUI = async () => {
@@ -126,7 +118,7 @@ const Cart = () => {
         </div>
 
         {isInCart.map((product) => {
-          const selectedPrice = product.price?.[0] || {};
+          const selectedPrice = product.priceId;
           return (
             <div
               key={product._id}
@@ -180,7 +172,7 @@ const Cart = () => {
               <div className="mr-2 mt-1 text-4xl text-gray-700 cursor-pointer hover:text-red-400">
                 <span
                   onClick={() =>
-                    handleCancel(product.priceId, product.productId._id)
+                    handleCancel(selectedPrice, product.productId._id)
                   }
                 >
                   <MdCancelPresentation />

@@ -71,6 +71,8 @@
   border: 1px solid #22c55e;
   padding: 0.5rem;
   border-radius: 0.375rem;
+  height: 50px;
+  width: 60px;
 }
 
 .navbar-cart span {
@@ -138,6 +140,9 @@
 
 .cart-price {
   background-color: #fde047;
+  margin-top: 37px;
+  padding-left: 10px;
+  margin-left: 10px;
 }
 
 .notification {
@@ -156,6 +161,8 @@
   justify-content: center;
   height: 20px;
   width: 20px;
+  margin-left: 10px;
+  margin-top: 3px;
   font-size: 10px;
 }
 
@@ -200,6 +207,7 @@
   .navbar-cart,
   .navbar-notification {
     padding: 0.25rem;
+    
   }
 }
 
