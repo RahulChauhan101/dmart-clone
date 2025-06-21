@@ -5,7 +5,8 @@ import { MdOutlineDeleteForever, MdCancelPresentation } from "react-icons/md";
 import { LiaMoneyBillWaveSolid } from "react-icons/lia";
 import { addToCart } from "../components/actions/addtoCart";
 import { deletetoCart } from "../components/actions/deletetoCart";
-
+import { getTocart } from "../components/actions/getTocart";
+import { decrementCartItem } from "../components/actions/cart.Actins";
 const Cart = () => {
   const dispatch = useDispatch();
   const [data, setData] = useState([]);
@@ -16,32 +17,24 @@ const Cart = () => {
     let isMounted = true;
     const controller = new AbortController();
 
+
+
     const fetchCartData = async () => {
-      try {
-        const gettoken = JSON.parse(localStorage.getItem("user"));
-        const response = await axios.get("http://localhost:5000/api/auth/me", {
-          headers: { Authorization: `Bearer ${gettoken}` },
-          signal: controller.signal,
-        });
+  try {
+    const gettoken = JSON.parse(localStorage.getItem("user"));
+    const response = await axios.get("http://localhost:5000/api/auth/me", {
+      headers: { Authorization: `Bearer ${gettoken}` },
+    });
 
-        const userid = response.data._id;
-        setUserId(userid);
+    const userid = response.data._id;
+    setUserId(userid);
 
-        const cartResponse = await axios.get(
-          `http://localhost:5000/api/user/cart/${userid}`,
-          { signal: controller.signal }
-        );
-
-        if (isMounted) {
-          setData(cartResponse.data);
-          setIsInCart(cartResponse.data.cart || []);
-        }
-      } catch (err) {
-        if (err.name !== "CanceledError") {
-          console.error("Error fetching cart data:", err);
-        }
-      }
-    };
+    const cartRes = await axios.get(`http://localhost:5000/api/user/cart/${userid}`);
+    setIsInCart(cartRes.data.cart || []);
+  } catch (err) {
+    console.log("error getcart", err);
+  }
+};
 
     fetchCartData();
 
@@ -51,30 +44,31 @@ const Cart = () => {
     };
   }, []);
 
-  const handleAddToCart = (selectedPrice, productId) => {
-    console.log("asd", userId, productId, selectedPrice);
-    dispatch(addToCart(userId, productId, selectedPrice));
+
+  const handleAddToCart = (priceId, productId) => {
+    dispatch(
+      addToCart({
+         userId,
+        productId,
+        priceId,
+        quantity: 1,
+
+      })
+    );
   };
 
-  const handleDecrementa = (selectedPrice, productId) => {
-    console.log("decrement", userId, productId, selectedPrice);
-    axios
-      .delete("http://localhost:5000/api/user/decrement-to-cart", {
-        data: {
-          userId,
+    const handleDecrementa = (selectedPrice, productId) =>{
+      dispatch(
+        decrementCartItem({
+           userId,
           productId,
           priceId: selectedPrice,
           quantity: 1,
-        },
-      })
-      .then((res) => {
-        console.log("Cart Response", res.data);
-        updateCartUI();
-      })
-      .catch((err) => {
-        console.error("Error delete to cart", err);
-      });
-  };
+        })
+
+      );
+    };
+
 
   const handleCancel = (selectedPrice, productId) => {
     console.log("delete redex", userId, productId, selectedPrice);

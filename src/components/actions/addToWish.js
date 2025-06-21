@@ -1,4 +1,5 @@
-// redux/actions/cartActions.js
+
+
 import axios from "axios";
 
 export const addToWish = ({ userId, productId, priceId, quantity }) => {

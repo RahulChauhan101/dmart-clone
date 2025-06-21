@@ -10,6 +10,7 @@ const addtocartReducer = (state = initialState, action) => {
         ...state,
         cart: action.payload,
       };
+
     default:
       return state;
   }
