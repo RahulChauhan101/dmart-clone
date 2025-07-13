@@ -170,7 +170,36 @@
    Responsive Breakpoints
 ------------------------ */
 
-/* Small screens (max-width: 640px) */
+
+/* Small Screens */
+@media (max-width: 640px) {
+  .search-input {
+    display: none;
+  }
+}
+
+/* Medium Screens */
+@media (min-width: 768px) {
+  .search-section {
+    max-width: 400px;
+  }
+}
+
+/* Large Screens */
+@media (min-width: 1024px) {
+  .navbar {
+    padding: 0 2rem;
+  }
+  .navbar-top {
+    padding: 1rem 2rem;
+  }
+}
+
+
+
+
+
+/* Small screens (max-width: 640px)
 @media (max-width: 640px) {
   .navbar-top {
     flex-direction: row;
@@ -211,7 +240,7 @@
   }
 }
 
-/* Medium screens (min-width: 768px) */
+Medium screens (min-width: 768px)
 @media (min-width: 768px) {
   .search-section {
     max-width: 400px;
@@ -223,7 +252,7 @@
   }
 }
 
-/* Large screens (min-width: 1024px) */
+Large screens (min-width: 1024px)
 @media (min-width: 1024px) {
   .navbar {
     padding: 0 2rem;
@@ -232,7 +261,7 @@
   .navbar-top {
     padding: 1rem 2rem;
   }
-}
+} */
 
 
 

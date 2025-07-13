@@ -1,7 +1,6 @@
-// src/components/reducer/getTocartReducer.js
 
 const initialState = {
-  cartItems: [],
+  cart: {},
 };
 
 const getToCartReducer = (state = initialState, action) => {
@@ -9,7 +8,7 @@ const getToCartReducer = (state = initialState, action) => {
     case "GET_TO_CART":
       return {
         ...state,
-        cartItems: action.payload,
+        cart: action.payload,
       };
     default:
       return state;

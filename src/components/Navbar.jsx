@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
+import { useSelector } from "react-redux";
 import {
   MdOutlineLocationOn,
   MdOutlineNotificationsNone,
@@ -25,13 +26,14 @@ const categoryList = [
 ];
 
 const Navbar = ({ setUser }) => {
+  
   const [user, setuser] = useState("");
   const [userId, setUserId] = useState("");
   const [image, setImage] = useState("");
   const [isInCart, setIsInCart] = useState([]);
   const [isOpan, setIsOpan] = useState(false);
   const [isNotification, setIsNotification] = useState(false);
-
+  const cartData = useSelector((state) => state.getToCartReducer.cart);
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("user"));
 
@@ -48,12 +50,13 @@ const Navbar = ({ setUser }) => {
         return axios.get(`http://localhost:5000/api/user/cart/${_id}`);
       })
       .then((res) => {
-        setIsInCart(res.data.cart || []);
+        setIsInCart(cartData?.cart || res.data.cart || []);
       })
       .catch((err) => {
         console.error("Error fetching user or cart:", err);
       });
   }, []);
+  console.log("ss:", cartData);
 
   const logout = () => {
     setUser("");
@@ -163,9 +166,8 @@ const Navbar = ({ setUser }) => {
             onClick={() => setIsNotification(!isNotification)}
             className="navbar-notification"
           >
-                                    <span className="notification">1</span>
+            <span className="notification">1</span>
             <MdOutlineNotificationsNone className="notification-icon" />
-
           </div>
 
           <div onClick={() => setIsOpan(!isOpan)} className="navbar-cart">

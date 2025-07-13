@@ -7,34 +7,41 @@ import { addToCart } from "../components/actions/addtoCart";
 import { deletetoCart } from "../components/actions/deletetoCart";
 import { getTocart } from "../components/actions/getTocart";
 import { decrementCartItem } from "../components/actions/cart.Actins";
+
 const Cart = () => {
   const dispatch = useDispatch();
-  const [data, setData] = useState([]);
-  const [isInCart, setIsInCart] = useState([]);
   const [userId, setUserId] = useState("");
+  
+  // Use useSelector to get cart data from Redux store
+  const cartData = useSelector((state) => state.getToCartReducer.cart);
+
+  
+  console.log("cartData", cartData);
+
+  
+  // Use cart data from Redux store, fallback to empty array
+  const isInCart = cartData?.cart  || [];
 
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
 
-
-
     const fetchCartData = async () => {
-  try {
-    const gettoken = JSON.parse(localStorage.getItem("user"));
-    const response = await axios.get("http://localhost:5000/api/auth/me", {
-      headers: { Authorization: `Bearer ${gettoken}` },
-    });
+      try {
+        const gettoken = JSON.parse(localStorage.getItem("user"));
+        const response = await axios.get("http://localhost:5000/api/auth/me", {
+          headers: { Authorization: `Bearer ${gettoken}` },
+        });
 
-    const userid = response.data._id;
-    setUserId(userid);
+        const userid = response.data._id;
+        setUserId(userid);
 
-    const cartRes = await axios.get(`http://localhost:5000/api/user/cart/${userid}`);
-    setIsInCart(cartRes.data.cart || []);
-  } catch (err) {
-    console.log("error getcart", err);
-  }
-};
+        // Dispatch action to get cart data
+        dispatch(getTocart(userid));
+      } catch (err) {
+        console.log("error getcart", err);
+      }
+    };
 
     fetchCartData();
 
@@ -44,6 +51,17 @@ const Cart = () => {
     };
   }, []);
 
+  // Effect to refresh cart data when cart actions are dispatched
+  // useEffect(() => {
+  //   if (userId) {
+  //     // Refresh cart data after any cart action
+  //     const timer = setTimeout(() => {
+  //       dispatch(getTocart(userId));
+  //     }, 100);
+      
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [cartData, cartItems, addToCartData, userId, dispatch]);
 
   const handleAddToCart = (priceId, productId) => {
     dispatch(
@@ -75,14 +93,10 @@ const Cart = () => {
     dispatch(deletetoCart(userId, productId, selectedPrice));
   };
 
-  const updateCartUI = async () => {
-    try {
-      const cartResponse = await axios.get(
-        `http://localhost:5000/api/user/cart/${userId}`
-      );
-      setIsInCart(cartResponse.data.cart || []);
-    } catch (err) {
-      console.error("Error updating cart UI", err);
+  const updateCartUI = () => {
+    // Dispatch action to refresh cart data from Redux
+    if (userId) {
+      dispatch(getTocart(userId));
     }
   };
 

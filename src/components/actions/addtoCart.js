@@ -1,8 +1,8 @@
-// redux/actions/cartActions.js
+
 import axios from "axios";
 
 export const addToCart = ({ userId, productId, priceId, quantity }) => {
-  console.log("asd",userId,productId,priceId);
+  
   
   return async (dispatch) => {
     try {
