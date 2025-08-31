@@ -1,0 +1,23 @@
+.map-modal {
+  position: absolute;
+  top: 30%;
+  right: 0;
+  width: 40%;
+  height: 400px;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.close-btn {
+  float: right;
+  margin: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+  border: none;
+  background: #f44336;
+  color: #fff;
+  border-radius: 5px;
+}

@@ -25,7 +25,6 @@ const ProductSelect = ({ product, onSelectChange }) => {
     <div className="">
       <h3 className="mb-1.5">{product.name}</h3>
       <Select
-        // className='mb-2 mt-2 hover:border-4 border-green-100 hover:border-#10d65f-300 rounded-md cursor-pointer z-50'
         classNames={{
           control: (state) =>
             state.isFocused ? "border-red-600" : "border-grey-300",
@@ -50,12 +49,7 @@ const ProductSelect = ({ product, onSelectChange }) => {
           }),
           option: (base, state) => ({
             ...base,
-
             backgroundColor: state.isFocused ? "#e9f6ec" : "white",
-            cursor: "pointer",
-            "&:hover": {
-              borderColor: "#ae0f0f",
-            },
             color: state.isFocused ? "#21ae0f" : "black",
             cursor: "pointer",
             "&:hover": {
