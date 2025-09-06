@@ -1,0 +1,112 @@
+/* Map container fills the entire viewport */
+.map-container {
+  height: 100vh;      /* Full viewport height */
+  width: 100vw;       /* Full viewport width */
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+.leaflet-container:active {
+  cursor: grabbing;
+}
+
+/* Search box styling */
+.search-box {
+  position: absolute;
+  top: 10px;
+  margin-left: 3.5%;
+  /* transform: translateX(-50%); */
+  display: flex;
+  /* flex-wrap: wrap;      Wrap inputs on small screens */
+  gap: 10px;
+  z-index: 1000;
+  padding: 10px;      /* Responsive width */
+  max-width: 700px;   
+  
+}
+
+.search-box div {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+  min-width: 150px;
+}
+
+.search-box input {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+  outline: none;
+  background: #f0f0f0;
+  box-sizing: border-box;
+}
+
+.search-box button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: rgb(55, 209, 55);
+  color: white;
+  font-weight: bold;
+  border: none;
+}
+
+/* Distance box styling */
+.distance-box {
+  position: absolute;
+  display: flex;
+  bottom: 20px;
+  top: 10%;
+  left: 10px;
+  height: 50px;
+  width: 55%;
+  gap: 15px;
+  transform: translateX(-5%);
+  background-color: white;
+  padding: 10px 45px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 1000;
+  white-space: nowrap;
+}
+
+.distance-box div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-box {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .search-box div {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-box input {
+    width: 90%;
+  }
+
+  .search-box button {
+    width: 50%;
+  }
+
+  .distance-box {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+}

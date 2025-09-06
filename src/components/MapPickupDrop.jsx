@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import "./MapPickupDrop.css";
+import MapView from "./Mapview";
 
 const containerStyle = {
   width: "100%",
@@ -23,16 +24,8 @@ const MapPickupDrop = ({ setIsMapOpen }) => {
   return (
     <div className="map-modal">
       <button className="close-btn" onClick={() => setIsMapOpen(false)}>Close</button>
-      <LoadScript googleMapsApiKey="YOUR_GOOGLE_API_KEY">
-        <GoogleMap
-          mapContainerStyle={containerStyle}
-          center={pickup}
-          zoom={15}
-        >
-          <Marker position={pickup} draggable={true} onDragEnd={handlePickupDragEnd} label="Pickup" />
-          <Marker position={drop} draggable={true} onDragEnd={handleDropDragEnd} label="Drop" />
-        </GoogleMap>
-      </LoadScript>
+      <MapView/>;
+
     </div>
   );
 };

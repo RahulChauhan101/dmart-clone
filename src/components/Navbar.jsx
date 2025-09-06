@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoChevronDown } from "react-icons/io5";
-import { useSelector } from "react-redux";
 import { MdOutlineLocationOn, MdOutlineNotificationsNone } from "react-icons/md";
 import { BiTimer } from "react-icons/bi";
 import { TfiShoppingCart } from "react-icons/tfi";
 import { LuMenu } from "react-icons/lu";
 import { IoMdLogOut } from "react-icons/io";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { useSelector } from "react-redux";
 import axios from "axios";
-
-import "./navbar.css";
+import MapView from "./MapView"; // Correct relative import
 import Cart from "../assets/Cart";
 import Notification from "../pages/Notification";
+import "./navbar.css";
 
 const categoryList = [
   { id: 1, name: "Readytocook", link: "#" },
@@ -22,8 +21,6 @@ const categoryList = [
   { id: 6, name: "Detergents & Fabric Care", link: "#" },
 ];
 
-const containerStyle = { width: "100%", height: "400px" };
-
 const Navbar = ({ setUser }) => {
   const [user, setuser] = useState("");
   const [image, setImage] = useState("");
@@ -32,24 +29,16 @@ const Navbar = ({ setUser }) => {
   const [isNotification, setIsNotification] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
 
-  const [pickup, setPickup] = useState({ lat: 23.0554, lng: 72.6686, city: "Ahmedabad", pin: "382350" });
-  const [drop, setDrop] = useState({ lat: 23.0654, lng: 72.6786, city: "", pin: "" });
-  const [dropInput, setDropInput] = useState("");
-
   const cartData = useSelector((state) => state.getToCartReducer.cart);
 
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("user"));
     if (!token) return;
-
     axios.get("http://localhost:5000/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
-        const { name, profileImage, _id } = res.data;
-        setuser(name);
-        setImage(profileImage);
-        return axios.get(`http://localhost:5000/api/user/cart/${_id}`);
+        setuser(res.data.name);
+        setImage(res.data.profileImage);
       })
-      .then((res) => setIsInCart(cartData?.cart || res.data.cart || []))
       .catch((err) => console.error(err));
   }, [cartData]);
 
@@ -64,64 +53,26 @@ const Navbar = ({ setUser }) => {
     0
   );
 
-  // Drop marker drag
-  const handleDropMarkerDrag = async (e) => {
-    const lat = e.latLng.lat();
-    const lng = e.latLng.lng();
-
-    try {
-      const res = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_API_KEY`
-      );
-      const addressComponents = res.data.results[0]?.address_components || [];
-      const city = addressComponents.find(c => c.types.includes("locality"))?.long_name || "";
-      const pin = addressComponents.find(c => c.types.includes("postal_code"))?.long_name || "";
-      setDrop({ lat, lng, city, pin });
-      setDropInput(city);
-    } catch (err) {
-      console.error(err);
-      setDrop({ ...drop, lat, lng });
-    }
-  };
-
-  // Search drop location input
-  const searchDropLocation = async () => {
-    if (!dropInput) return;
-    try {
-      const res = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(dropInput)}&AIzaSyAu27hr33YOYLlYlSr0yHitilzeetBFbxw`
-      );
-      const result = res.data.results[0];
-      if (result) {
-        const { lat, lng } = result.geometry.location;
-        const addressComponents = result.address_components;
-        const city = addressComponents.find(c => c.types.includes("locality"))?.long_name || "";
-        const pin = addressComponents.find(c => c.types.includes("postal_code"))?.long_name || "";
-        setDrop({ lat, lng, city, pin });
-      }
-    } catch (err) {
-      console.error("Drop search error:", err);
-    }
-  };
-
   return (
     <nav className="navbar">
-      {/* Top Navbar */}
       <div className="navbar-top">
         <div className="navbar-logo-location cursor-pointer" onClick={() => setIsMapOpen(true)}>
           <img src="https://cdn.dmart.in/images/icons/dmart_ready_logo.svg" alt="logo" className="logo" />
           <div className="location-box">
-            <MdOutlineLocationOn /> {pickup.city}, {pickup.pin} <IoChevronDown />
+            <MdOutlineLocationOn /> Ahmedabad, 382350 <IoChevronDown />
           </div>
         </div>
+
         <div className="delivery-time-info">
           <p>Earliest <span className="text-green">Home Delivery</span> available</p>
           <p><BiTimer /> Today 05:00 PM - 08:00 PM</p>
         </div>
+
         <div className="search-section">
           <input type="search" placeholder="Search here..." className="search-input" />
           <button className="search-button">Search</button>
         </div>
+
         <div className="user-actions">
           <div className="navbar-profile">
             <img src={image} alt="profile" />
@@ -137,7 +88,6 @@ const Navbar = ({ setUser }) => {
         </div>
       </div>
 
-      {/* Categories */}
       <div className="navbar-categories">
         <div className="all-categories"><LuMenu /> All Categories</div>
         {categoryList.map(c => <a key={c.id} href={c.link}>{c.name}</a>)}
@@ -146,35 +96,197 @@ const Navbar = ({ setUser }) => {
       {isOpan && <Cart />}
       {isNotification && <Notification />}
 
-
-      {/* Map Modal */}
       {isMapOpen && (
         <div className="map-modal-right">
-          <button className="close-btn" onClick={() => setIsMapOpen(false)}>
-            Close
-          </button>
-
-          <div style={{ padding: "10px" }}>
-          </div>
-          {/* Embed fixed map iframe for pickup */}
-          <iframe
-            title="Pickup Location"
-            src="https://www.google.com/maps/embed?pb=!1m26!1m12!1m3!1d7342.0339403810185!2d72.66928389256638!3d23.05983941659034!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m11!3e6!4m3!3m2!1d23.0625498!2d72.6742452!4m5!1s0x395e87239d0d48dd%3A0x46678a3aab29e34f!2sD-Mart%20Antrix%20Nikol%20Naroda%2C%20Antrix%20Arcade%2C%20Dmart%20Chokdi%2C%20Raspan%20Cross%20Rd%2C%20Nikol%2C%20Ahmedabad%2C%20Gujarat%20380049!3m2!1d23.0550894!2d72.6712381!5e0!3m2!1sen!2sin"
-            width="100%"
-            height="300"
-            style={{ border: 0 }}
-            allowFullScreen=""
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          ></iframe>
+          <button className="close-btn" onClick={() => setIsMapOpen(false)}>Close</button>
+          <MapView />
         </div>
       )}
-
     </nav>
   );
 };
 
 export default Navbar;
+
+
+
+// import React, { useEffect, useState } from "react";
+// import { IoChevronDown } from "react-icons/io5";
+// import { useSelector } from "react-redux";
+// import { MdOutlineLocationOn, MdOutlineNotificationsNone } from "react-icons/md";
+// import { BiTimer } from "react-icons/bi";
+// import { TfiShoppingCart } from "react-icons/tfi";
+// import { LuMenu } from "react-icons/lu";
+// import { IoMdLogOut } from "react-icons/io";
+// import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+// import axios from "axios";
+// import MapView from "../components/MapView";
+// import "./navbar.css";
+// import Cart from "../assets/Cart";
+// import Notification from "../pages/Notification";
+
+// const categoryList = [
+//   { id: 1, name: "Readytocook", link: "#" },
+//   { id: 2, name: "Home Appliances", link: "#" },
+//   { id: 3, name: "Cookware", link: "#" },
+//   { id: 4, name: "Serveware", link: "#" },
+//   { id: 5, name: "Cleaners", link: "#" },
+//   { id: 6, name: "Detergents & Fabric Care", link: "#" },
+// ];
+
+// const containerStyle = { width: "100%", height: "400px" };
+
+// const Navbar = ({ setUser }) => {
+//   const [user, setuser] = useState("");
+//   const [image, setImage] = useState("");
+//   const [isInCart, setIsInCart] = useState([]);
+//   const [isOpan, setIsOpan] = useState(false);
+//   const [isNotification, setIsNotification] = useState(false);
+//   const [isMapOpen, setIsMapOpen] = useState(false);
+
+//   const [pickup, setPickup] = useState({ lat: 23.0554, lng: 72.6686, city: "Ahmedabad", pin: "382350" });
+//   const [drop, setDrop] = useState({ lat: 23.0654, lng: 72.6786, city: "", pin: "" });
+//   const [dropInput, setDropInput] = useState("");
+
+//   const cartData = useSelector((state) => state.getToCartReducer.cart);
+
+//   useEffect(() => {
+//     const token = JSON.parse(localStorage.getItem("user"));
+//     if (!token) return;
+
+//     axios.get("http://localhost:5000/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+//       .then((res) => {
+//         const { name, profileImage, _id } = res.data;
+//         setuser(name);
+//         setImage(profileImage);
+//         return axios.get(`http://localhost:5000/api/user/cart/${_id}`);
+//       })
+//       .then((res) => setIsInCart(cartData?.cart || res.data.cart || []))
+//       .catch((err) => console.error(err));
+//   }, [cartData]);
+
+//   const logout = () => {
+//     setUser("");
+//     localStorage.setItem("user", JSON.stringify(""));
+//   };
+
+//   const totalItems = isInCart.length;
+//   const totalPrice = isInCart.reduce(
+//     (sum, product) => sum + (product.quantity || 1) * (product?.priceDetails?.DmartPrice || 0),
+//     0
+//   );
+
+//   // Drop marker drag
+//   const handleDropMarkerDrag = async (e) => {
+//     const lat = e.latLng.lat();
+//     const lng = e.latLng.lng();
+
+//     try {
+//       const res = await axios.get(
+//         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_API_KEY`
+//       );
+//       const addressComponents = res.data.results[0]?.address_components || [];
+//       const city = addressComponents.find(c => c.types.includes("locality"))?.long_name || "";
+//       const pin = addressComponents.find(c => c.types.includes("postal_code"))?.long_name || "";
+//       setDrop({ lat, lng, city, pin });
+//       setDropInput(city);
+//     } catch (err) {
+//       console.error(err);
+//       setDrop({ ...drop, lat, lng });
+//     }
+//   };
+
+//   // Search drop location input
+//   const searchDropLocation = async () => {
+//     if (!dropInput) return;
+//     try {
+//       const res = await axios.get(
+//         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(dropInput)}&AIzaSyAu27hr33YOYLlYlSr0yHitilzeetBFbxw`
+//       );
+//       const result = res.data.results[0];
+//       if (result) {
+//         const { lat, lng } = result.geometry.location;
+//         const addressComponents = result.address_components;
+//         const city = addressComponents.find(c => c.types.includes("locality"))?.long_name || "";
+//         const pin = addressComponents.find(c => c.types.includes("postal_code"))?.long_name || "";
+//         setDrop({ lat, lng, city, pin });
+//       }
+//     } catch (err) {
+//       console.error("Drop search error:", err);
+//     }
+//   };
+
+//   return (
+//     <nav className="navbar">
+//       {/* Top Navbar */}
+//       <div className="navbar-top">
+//         <div className="navbar-logo-location cursor-pointer" onClick={() => setIsMapOpen(true)}>
+//           <img src="https://cdn.dmart.in/images/icons/dmart_ready_logo.svg" alt="logo" className="logo" />
+//           <div className="location-box">
+//             <MdOutlineLocationOn /> {pickup.city}, {pickup.pin} <IoChevronDown />
+//           </div>
+//         </div>
+//         <div className="delivery-time-info">
+//           <p>Earliest <span className="text-green">Home Delivery</span> available</p>
+//           <p><BiTimer /> Today 05:00 PM - 08:00 PM</p>
+//         </div>
+//         <div className="search-section">
+//           <input type="search" placeholder="Search here..." className="search-input" />
+//           <button className="search-button">Search</button>
+//         </div>
+//         <div className="user-actions">
+//           <div className="navbar-profile">
+//             <img src={image} alt="profile" />
+//             <h5>{user}</h5>
+//           </div>
+//           <div onClick={logout} className="navbar-logout"><IoMdLogOut /> Logout</div>
+//           <div onClick={() => setIsNotification(!isNotification)} className="navbar-notification">
+//             <MdOutlineNotificationsNone /> <span>1</span>
+//           </div>
+//           <div onClick={() => setIsOpan(!isOpan)} className="navbar-cart">
+//             <TfiShoppingCart /> <span>{totalItems}</span> ₹{totalPrice}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Categories */}
+//       <div className="navbar-categories">
+//         <div className="all-categories"><LuMenu /> All Categories</div>
+//         {categoryList.map(c => <a key={c.id} href={c.link}>{c.name}</a>)}
+//       </div>
+
+//       {isOpan && <Cart />}
+//       {isNotification && <Notification />}
+
+
+//       {/* Map Modal */}
+//       {isMapOpen && (
+//         <div className="map-modal-right">
+//           <button className="close-btn" onClick={() => setIsMapOpen(false)}>
+//             Close
+//           </button>
+
+//           <div style={{ padding: "10px" }}>
+//           </div>
+//           {/* Embed fixed map iframe for pickup */}
+//           <iframe
+//             title="Pickup Location"
+//             src="https://www.google.com/maps/embed?pb=!1m26!1m12!1m3!1d7342.0339403810185!2d72.66928389256638!3d23.05983941659034!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m11!3e6!4m3!3m2!1d23.0625498!2d72.6742452!4m5!1s0x395e87239d0d48dd%3A0x46678a3aab29e34f!2sD-Mart%20Antrix%20Nikol%20Naroda%2C%20Antrix%20Arcade%2C%20Dmart%20Chokdi%2C%20Raspan%20Cross%20Rd%2C%20Nikol%2C%20Ahmedabad%2C%20Gujarat%20380049!3m2!1d23.0550894!2d72.6712381!5e0!3m2!1sen!2sin"
+//             width="100%"
+//             height="300"
+//             style={{ border: 0 }}
+//             allowFullScreen=""
+//             loading="lazy"
+//             referrerPolicy="no-referrer-when-downgrade"
+//           ></iframe>
+//         </div>
+//       )}
+
+//     </nav>
+//   );
+// };
+
+// export default Navbar;
 
 
 
